@@ -11,6 +11,10 @@ def home():
         key=lambda page: page.meta['date'])
     return render_template('index.html', pages=sorted_posts)
 
+@app.route('/flights/')
+def flights():
+    return render_template('flights.html')
+
 
 @app.route('/<path:path>/')
 def page(path):
