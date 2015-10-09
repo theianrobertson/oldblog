@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+      html, body { height: 100%; margin: 0; padding: 0; }
+      
+      circle.cday {
+        fill-opacity: 0.5;
+        fill: #3366CC;
+      }
+
+      circle.cday:hover {
+        fill-opacity: 1.0;
+      }
+
+      text.tday {
+        pointer-events: none;
+        fill: white;
+        cursor: default; 
+        text-anchor: middle;
+        font-family: sans-serif;
+        font-size: 11px;
+      }
+
+      text.legend {
+        fill: black;
+        cursor: default; 
+        font-family: sans-serif;
+        font-size: 14px;
+      }
+
+      #map { height: 100%; }
+      #svgdays {
+        position:absolute;
+        left: 10px;
+        top: 10px;
+      }
+      #svglegend {
+        position:absolute;
+        top: 85%;
+        left:90%;
+      }
+      img.logo {
+        position:absolute;
+        left:20px;
+        opacity: 0.5;
+      }
+      img.logo:hover {
+        opacity: 1.0;
+      }
+      rect.flight {
+        opacity: 0.5;
+        fill: #3366CC;
+        stroke-width: 0;
+      }
+      rect.flight:hover {
+        opacity: 1.0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <svg width="220" height="50" style="position:absolute;left:0;right:0;margin-left:auto;margin-right:auto;top:10px;">
+      <rect x="0" y="0" rx="10" ry="10" width="220" height="50" style="fill-opacity:0.5;fill:#3366CC;stroke-width:0;" onclick="stopIt()" />
+      <text id="minute" x="110" y="33" style="font-size:25px;font-family:sans-serif;text-anchor:middle;fill:white;cursor:default;"></text>
+    </svg>
+    <svg width="155" height="30" style="position:absolute;right:10px;top:10px;">
+      <rect class="flight" id="flightTog" x="0" y="0" rx="10" ry="10" width="76" height="30" onClick="setMap(currDay)"/>
+      <text x="38" y="19" style="font-size:14px;font-family:sans-serif;text-anchor:middle;fill:white;cursor:default;pointer-events:none;">Flights</text>
+      <rect class="flight" id="pathTog" x="79" y="0" rx="10" ry="10" width="76" height="30" onClick="setPathMap()"/>
+      <text x="117" y="19" style="font-size:14px;font-family:sans-serif;text-anchor:middle;fill:white;cursor:default;pointer-events:none;">Paths</text>
+    </svg>
+
+    <!--Carriers-->
+    <img src="/static/flights/AS.svg" id="AS" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 140px;">
+    <img src="/static/flights/AA.svg" id="AA" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 190px;">
+    <img src="/static/flights/DL.svg" id="DL" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 240px;">
+    <img src="/static/flights/MQ.svg" id="MQ" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 290px;">
+    <img src="/static/flights/EV.svg" id="EV" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 340px;">
+    <img src="/static/flights/F9.svg" id="F9" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 390px;">
+    <img src="/static/flights/B6.svg" id="B6" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 440px;">
+    <img src="/static/flights/OO.svg" id="OO" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 490px;">
+    <img src="/static/flights/WN.svg" id="WN" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 540px;">
+    <img src="/static/flights/UA.svg" id="UA" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 590px;">
+    <img src="/static/flights/US.svg" id="US" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 640px;">
+    <img src="/static/flights/VX.svg" id="VX" height="50" width="80" class="logo" onclick="setCarrier(this.id)" style="top: 690px;">
+
+    <svg width="100" height="120" id="svglegend">
+      <circle cx="20" cy="25" r="12" fill-opacity="1.0" fill="#32CD32" />
+      <circle cx="20" cy="55" r="12" fill-opacity="1.0" fill="#FFD700" />
+      <circle cx="20" cy="85" r="12" fill-opacity="1.0" fill="#FF4500" />
+      <text class="legend" x="38" y="31">On Time</text>
+      <text class="legend" x="38" y="61">Delayed</text>
+      <text class="legend" x="38" y="91">Cancelled</text>
+    </svg>
+    <svg width="164" height="118" id="svgdays">
+    <circle class="cday" cx="105" cy="13" r="10" onclick="setMap(1)" />
+    <circle class="cday" cx="128" cy="13" r="10" onclick="setMap(2)" />
+    <circle class="cday" cx="151" cy="13" r="10" onclick="setMap(3)" />
+    <circle class="cday" cx="13" cy="36" r="10" onclick="setMap(4)" />
+    <circle class="cday" cx="36" cy="36" r="10" onclick="setMap(5)" />
+    <circle class="cday" cx="59" cy="36" r="10" onclick="setMap(6)" />
+    <circle class="cday" cx="82" cy="36" r="10" onclick="setMap(7)" />
+    <circle class="cday" cx="105" cy="36" r="10" onclick="setMap(8)" />
+    <circle class="cday" cx="128" cy="36" r="10" onclick="setMap(9)" />
+    <circle class="cday" cx="151" cy="36" r="10" onclick="setMap(10)" />
+    <circle class="cday" cx="13" cy="59" r="10" onclick="setMap(11)" />
+    <circle class="cday" cx="36" cy="59" r="10" onclick="setMap(12)" />
+    <circle class="cday" cx="59" cy="59" r="10" onclick="setMap(13)" />
+    <circle class="cday" cx="82" cy="59" r="10" onclick="setMap(14)" />
+    <circle class="cday" cx="105" cy="59" r="10" onclick="setMap(15)" />
+    <circle class="cday" cx="128" cy="59" r="10" onclick="setMap(16)" />
+    <circle class="cday" cx="151" cy="59" r="10" onclick="setMap(17)" />
+    <circle class="cday" cx="13" cy="82" r="10" onclick="setMap(18)" />
+    <circle class="cday" cx="36" cy="82" r="10" onclick="setMap(19)" />
+    <circle class="cday" cx="59" cy="82" r="10" onclick="setMap(20)" />
+    <circle class="cday" cx="82" cy="82" r="10" onclick="setMap(21)" />
+    <circle class="cday" cx="105" cy="82" r="10" onclick="setMap(22)" />
+    <circle class="cday" cx="128" cy="82" r="10" onclick="setMap(23)" />
+    <circle class="cday" cx="151" cy="82" r="10" onclick="setMap(24)" />
+    <circle class="cday" cx="13" cy="105" r="10" onclick="setMap(25)" />
+    <circle class="cday" cx="36" cy="105" r="10" onclick="setMap(26)" />
+    <circle class="cday" cx="59" cy="105" r="10" onclick="setMap(27)" />
+    <circle class="cday" cx="82" cy="105" r="10" onclick="setMap(28)" />
+    <circle class="cday" cx="105" cy="105" r="10" onclick="setMap(29)" />
+    <circle class="cday" cx="128" cy="105" r="10" onclick="setMap(30)" />
+    <circle class="cday" cx="151" cy="105" r="10" onclick="setMap(31)" />
+    <text class="tday" x="105" y="17">1</text>
+    <text class="tday" x="128" y="17">2</text>
+    <text class="tday" x="151" y="17">3</text>
+    <text class="tday" x="13" y="40">4</text>
+    <text class="tday" x="36" y="40">5</text>
+    <text class="tday" x="59" y="40">6</text>
+    <text class="tday" x="82" y="40">7</text>
+    <text class="tday" x="105" y="40">8</text>
+    <text class="tday" x="128" y="40">9</text>
+    <text class="tday" x="151" y="40">10</text>
+    <text class="tday" x="13" y="63">11</text>
+    <text class="tday" x="36" y="63">12</text>
+    <text class="tday" x="59" y="63">13</text>
+    <text class="tday" x="82" y="63">14</text>
+    <text class="tday" x="105" y="63">15</text>
+    <text class="tday" x="128" y="63">16</text>
+    <text class="tday" x="151" y="63">17</text>
+    <text class="tday" x="13" y="86">18</text>
+    <text class="tday" x="36" y="86">19</text>
+    <text class="tday" x="59" y="86">20</text>
+    <text class="tday" x="82" y="86">21</text>
+    <text class="tday" x="105" y="86">22</text>
+    <text class="tday" x="128" y="86">23</text>
+    <text class="tday" x="151" y="86">24</text>
+    <text class="tday" x="13" y="109">25</text>
+    <text class="tday" x="36" y="109">26</text>
+    <text class="tday" x="59" y="109">27</text>
+    <text class="tday" x="82" y="109">28</text>
+    <text class="tday" x="105" y="109">29</text>
+    <text class="tday" x="128" y="109">30</text>
+    <text class="tday" x="151" y="109">31</text>
+    </svg>
+    <script type="text/javascript" src="/static/flights/flights_all.json"></script>
+    <script defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_Kx-jux5aIlKcBg2F7W32KZZuBOfGde8&libraries=geometry&callback=initMap">
+    </script>
+    <script type="text/javascript">
+
+//Here are some more global-y variables.
+var allPaths = [];
+var justPaths = [];
+var map;
+var firstCounter = 0;
+var aniCounter = firstCounter;
+var myInterval;
+var theDate;
+var currDay = 1;
+var currCarrier = '';
+
+function initMap() {
+  var myOptions = {
+    zoom: 5,
+    center: new google.maps.LatLng(39.5,-98),
+    mapTypeId: google.maps.MapTypeId.TERRAIN,
+    mapTypeControl: false,
+    //backgroundColor: 'white',
+    zoomControl: false,
+    streetViewControl: false,
+    panControl: false,
+    styles: [
+      {
+        stylers: [
+          { visibility: "off" }
+        ]
+      },{
+        featureType: "water",
+        stylers: [
+          { visibility: "on" },
+          //{ lightness: -50 },
+          //{ saturation: -100 },
+          { color: "#99CCFF" }
+        ]
+      },{
+        featureType: "administrative.province",
+        elementType: "geometry",
+        stylers: [
+          { visibility: "on" }
+        ]
+      },{
+        featureType: "administrative.country",
+        elementType: "geometry",
+        stylers: [
+          { visibility: "on" }
+        ]
+      },{
+        featureType: "administrative.province",
+        elementType: "labels",
+        stylers: [
+          { visibility: "on" }
+        ]
+      },{
+        featureType: "administrative.locality",
+        elementType: "labels",
+        stylers: [
+          { visibility: "on" }
+        ]
+      },{
+        featureType: "water",
+        elementType: "labels",
+        stylers: [
+          { visibility: "off" }
+        ]
+      }
+    ]
+  };
+  map = new google.maps.Map(document.getElementById('map'), myOptions);
+
+}
+
+
+//Sets up the map for a certain day.
+function setMap(day) {
+  //Clears the interval, and map if they aren't already clear, and resets the animation counter.
+  if (allPaths.length > 0 || justPaths.length > 0) {
+    window.clearInterval(myInterval);
+    clearMap();
+    aniCounter = firstCounter;
+  }
+
+  //Loop through all flights and add their paths if they are on that date.
+  for (var fl in flights) {
+    if (flights[fl].day == day) {
+      addPath(flights[fl].o_lat, flights[fl].o_lng, flights[fl].d_lat, flights[fl].d_lng, flights[fl].start, flights[fl].dur, flights[fl].col, flights[fl].car)
+    }
+  }
+
+  currDay = day;
+  theDate = day.toString();
+  if (theDate.length == 1) {theDate = "0" + theDate}
+  theDate = "2015-01-" + theDate;
+  
+  //Now set up the interval again.
+  myInterval = window.setInterval(aniFunc, 30);
+
+  document.getElementById("pathTog").style.opacity = 0.5;
+  document.getElementById("flightTog").style.opacity = 1.0;
+}
+
+
+//Sets up the map for a certain day with paths only.
+function setPathMap() {
+  //Clears the interval, and map if they aren't already clear, and resets the animation counter.
+  window.clearInterval(myInterval);
+  clearMap();
+  aniCounter = firstCounter;
+
+  //Loop through all flights and add their paths if they are on that date.
+  for (var fl in flights) {
+    if (currCarrier == "" || flights[fl].car == currCarrier) {
+      addJustPath(flights[fl].o_lat, flights[fl].o_lng, flights[fl].d_lat, flights[fl].d_lng, flights[fl].start, flights[fl].dur, flights[fl].col, flights[fl].car)
+    }
+  }
+
+  document.getElementById("pathTog").style.opacity = 1.0;
+  document.getElementById("flightTog").style.opacity = 0.5;
+}
+
+function stopIt() {
+  window.clearInterval(myInterval)
+}
+
+
+//Filters to specific carriers.
+function setCarrier(carrier) {
+  var elem = document.getElementById(carrier);
+
+  if (currCarrier == '') {
+    //Do nothing
+    elem.style.opacity = 1.0;
+    currCarrier = carrier;
+  } else if (currCarrier == carrier) {
+    //De-select, go back to #nofilter
+    elem.style.opacity = 0.5;
+    currCarrier = '';
+  } else {
+    document.getElementById(currCarrier).style.opacity = 0.5;
+    elem.style.opacity = 1.0;
+    currCarrier = carrier
+    //New select.
+  }
+
+  if (currCarrier != '') {
+    for (var path in allPaths) {
+      var icons = allPaths[path].get('icons');
+      icons[0].icon.fillOpacity = 0;
+      allPaths[path].set('icons', icons)
+    };
+    if (justPaths.length > 0) {
+      setPathMap();
+    }
+  }
+}
+
+
+//Defines the animation function.  Breaks out at 1440 (60 * 24).
+var aniFunc = function(){
+  if(aniCounter <= 1440) {
+    aniCounter++;
+    var i = aniCounter / 1;
+
+    //Sorts out the timer label
+    var timer = Math.floor(i / 60).toString() + ":";
+    var minuter = (i % 60).toString();
+    (minuter.length == 1) ? timer = timer + "0" + minuter : timer = timer + minuter;
+    timer = theDate + " " + timer;
+    document.getElementById('minute').innerHTML = timer;
+    
+    for (var path = 0; path < allPaths.length; path++) {
+      if (currCarrier != '' && allPaths[path].carrier != currCarrier) {
+      } else if (i < (allPaths[path].start - 15) || i > (allPaths[path].start + allPaths[path].dur + 15)) {
+      } else {
+        var icons = allPaths[path].get('icons');
+        if (i < (allPaths[path].start - 10) || i > (allPaths[path].start + allPaths[path].dur + 10)) {
+          icons[0].icon.fillOpacity = 0;
+        } else if (i < allPaths[path].start || i > (allPaths[path].start + allPaths[path].dur)) {
+          icons[0].icon.fillOpacity = 1;
+        } else {
+          icons[0].icon.fillOpacity = 1;
+          icons[0].offset = Math.round(1000 * (i - allPaths[path].start) / allPaths[path].dur) / 10 + '%'
+        }
+        allPaths[path].set('icons', icons);
+      }
+    }
+  } else {
+    window.clearInterval(myInterval);
+    if (currDay != 31) {
+      setMap(currDay + 1);
+    }
+  }
+};
+
+
+//Clears the map, to be used for another day.
+function clearMap() {
+  for (var i = 0; i < allPaths.length; i++) {
+    icons = allPaths[i].get('icons');
+    icons[0].icon.fillOpacity = 0;
+    allPaths[i].set('icons', icons);
+    allPaths[i].setMap(null);
+  };
+  allPaths = [];
+
+  //Now clear out any just paths.
+  for (var i = 0; i < justPaths.length; i++) {
+    justPaths[i].setMap(null);
+  };
+  justPaths = [];
+}
+
+//This function adds a path to the list of all paths.
+function addPath(o_lat, o_lng, d_lat, d_lng, start, dur, col, car) {
+  // Define the symbol, using one of the predefined paths ('CIRCLE')
+  // supplied by the Google Maps JavaScript API.
+  var lineSymbol = {
+    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+    scale: 3,
+    fillColor: col,
+    fillOpacity: 0.0
+  };
+
+  // Create the polyline and add the symbol to it via the 'icons' property.
+  var line = new google.maps.Polyline({
+    path: [{lat: Number(o_lat), lng: Number(o_lng)}, {lat: Number(d_lat), lng: Number(d_lng)}],
+    icons: [{
+      icon: lineSymbol,
+      fillOpacity: 0,
+      offset: '0%'
+    }],
+    map: map,
+    geodesic: true,
+    strokeOpacity: 0.00001,
+    strokeWeight: 0,
+    start: start,
+    dur: dur,
+    carrier: car
+  });
+
+  allPaths.push(line);
+
+}
+
+//This function adds a path to the list of all paths, with no icons.
+function addJustPath(o_lat, o_lng, d_lat, d_lng, start, dur, col, car) {
+  // Create the polyline and add the symbol to it via the 'icons' property.
+  var line = new google.maps.Polyline({
+    path: [{lat: Number(o_lat), lng: Number(o_lng)}, {lat: Number(d_lat), lng: Number(d_lng)}],
+    map: map,
+    strokeColor: "#228B22",
+    geodesic: true,
+    strokeOpacity: 0.2,
+    strokeWeight: 0.3,
+    carrier: car
+  });
+
+  justPaths.push(line);
+
+}
+    </script>
+
+  </body>
+</html>
