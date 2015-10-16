@@ -4,11 +4,7 @@
 <h2>Posts</h2>
 
 <ul class="page-list">
+  <li><a href="/voronoi/">Voronoi</li>
   <li><a href="/flights/">Flights</li>
-  {% for page in pages %}
-      <li><a href="{{ url_for('page', path=page.path) }}">
-          {{ page.meta.title }}
-      </a>- {{ page.meta.date }}</li>
-  {% endfor %}
 </ul>
 {% endblock %}

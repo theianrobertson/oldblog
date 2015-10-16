@@ -2,26 +2,31 @@
 <head>
   <meta charset="utf-8">
   <title>{% block page_title %}THE Ian Robertson.{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
   {% block css %}{% endblock %}
+  {% block js %}{% endblock %}
 
 </head>
 <body class="box">
 
-<nav class="nav-menu">
-    <ul>
-        <li><a href="{{ url_for('home') }}">Home</a></li>
-        <li><a href="https://github.com/theianrobertson">Source</a></li>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <ul class="nav navbar-nav">
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('aboutme') }}">About Me</a></li>
     </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="https://github.com/theianrobertson">Source</a></li>
+    </ul>
+  </div>
 </nav>
 
-<div class="{% block content_class %}container{% endblock content_class %}">
 
-  <div class="content" role="main">
+<div class="container-fluid" role="main"> 
     {% block content %}{% endblock %}
-  </div>
+</div>
 
-</div><!-- end container -->
+</div>
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

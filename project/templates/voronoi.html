@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block page_title %}Voronoi Cafes{% endblock %}
+
+{% block css %}
+  <style>
+    .pol-tims { fill: #C23440; }
+    .pol-star { fill: #007141; }
+    .pol-othr { fill: #888888; }
+    #chart path {
+      opacity: 0.6;
+    }
+    #chart path:hover {
+      opacity: 0.9;
+    }
+  </style>
+{% endblock %}
+
+{% block js %}
+  <script type="text/javascript" src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<h1>Toronto Cafe Voronoi Diagram</h1>
+  <p>
+  Based on a conversation with a friend about house prices in Toronto recently, we were wondering if we live in a Starbucks neighbourhood or a Tim Hortons Neighborhood (or even a *shudder* Coffee Time neighbourhood).  It was really just a joke, but I got to thinking about the question again when I was getting into D3.js.  I saw a sample <a href="Voronoi diagram wiki">Voronoi diagram</a> when I was playing around learning, and thought it'd be a cool thing to check out.
+  </p>
+  <p>
+  So here's a neat thing: a Voronoi diagram of coffee shops in Toronto.  Hover over a polygon to see the closest coffee shop in that area, and try to find your house!
+  </p>
+  <svg id="chart"><defs><clipPath id="clipper"></clipPath></defs></svg>
+  <div id="descriptor">.</div>
+  <h2>Notes</h2>
+  <ul>
+    <li>I grouped Country Style, Coffee Time and Tim Hortons together for colouring purposes.</li>
+    <li>Interesting thought: what's the overlap between Tim Hortons polygons and people that voted for Rob Ford?</li>
+    <li>Map data from OpenStreetMap.</li>
+    <li>Source code here:</li>
+  </ul>
+  <script type="text/javascript">
+    var height = 700;
+    var width = 900;
+    var vertices = [];
+    var pathv = [];
+
+    var chart = d3.select("#chart")
+        .attr("width", width)
+        .attr("height", height)
+
+    var projection = d3.geo.mercator()
+        .center([-79.378058,43.7182412])
+        .scale(95000)
+        .translate([width / 2, height / 2]);
+
+    var voronoi = d3.geom.voronoi()
+        .clipExtent([[0, 0], [width, height]])
+        .x(function(d) { return projection([d.lon, d.lat])[0]; })
+        .y(function(d) { return projection([d.lon, d.lat])[1]; });
+
+    function polygon(d) {
+      return "M" + d.join("L") + "Z";
+    }
+
+    d3.json("{{ url_for('static', filename='voronoi/toronto.json') }}", function(error, data) {
+
+      data.forEach(function(d,i) {
+        pathv.push(projection([d.lon,d.lat]));
+      });
+
+      var outer = d3.select("#clipper")
+          .datum(pathv)
+          //.attr("transform", function(d, i) { return "translate(" + projection([d.lon,d.lat]) + ")"; })
+
+      outer.append("path")
+          .attr("d", function(d) {return polygon(d);});
+
+    });
+
+    d3.json("{{ url_for('static', filename='voronoi/cafes.json') }}", function(error, data) {
+      if (error) return console.error(error);
+
+      data.elements.forEach(function(d,i) {
+        vertices.push(projection([d.lon, d.lat]));
+      });
+
+      
+      var bar = chart.selectAll("g.cafe")
+          .data(data.elements)
+        .enter().append("g")
+          .attr("transform", function(d, i) { return "translate(" + projection([d.lon,d.lat]) + ")"; })
+          .attr("class", "cafe");
+
+      bar.append("circle")
+          .attr("r", 1);
+
+      var path = chart.selectAll("path")
+          .data(voronoi(data.elements))
+        .enter().append("path")
+          .attr("class", function(d) {
+            if (d.point.tags.name == "Tim Hortons") {return "pol-tims";}
+            else if (d.point.tags.name == "Country Style") {return "pol-tims";}
+            else if (d.point.tags.name == "Coffee Time") {return "pol-tims";}
+            else if (d.point.tags.name == "Starbucks Coffee") {return "pol-star";}
+            else {return "pol-othr";}
+          })
+          .attr("clip-path", "url(#clipper)")
+          .attr("d", function(d) {return polygon(d);})
+          .on("mouseover", function(d, i) {
+            document.getElementById('descriptor').innerHTML = d.point.tags.name;
+          })
+          .on("mouseout", function(d, i) {
+            document.getElementById('descriptor').innerHTML = ".";
+          });
+
+
+    });
+
+  </script>
+
+{% endblock %}
+
+
+

@@ -15,10 +15,10 @@ def home():
 def flights():
     return render_template('flights.html')
 
+@app.route('/voronoi/')
+def voronoi():
+    return render_template('voronoi.html')
 
-@app.route('/<path:path>/')
-def page(path):
-    # Path is the filename of a page, without the file extension
-    # e.g. "first-post"
-    page = pages.get_or_404(path)
-    return render_template('page.html', page=page)
+@app.route('/aboutme/')
+def aboutme():
+    return render_template('aboutme.html')
