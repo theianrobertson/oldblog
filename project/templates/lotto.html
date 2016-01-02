@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block page_title %}Lotto Max{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block content %}
+<h1>Lotto Max Analysis</h1>
+  <p>
+I have a confession to make: I'm not immune to the allure of the lottery.  There are typically two times when I'll play the lottery:
+  </p>
+  <ul>
+    <li>When I'm really bummed out about work</li>
+    <li>When the <a href="https://en.wikipedia.org/wiki/Lotto_Max">Lotto Max</a> jackpot is higher than $50 million (now $60).
+  </ul>
+  <p>
+  If you're not familiar with the Lotto Max, here's how it's structured:
+  </p>
+  <ul>
+    <li>It's active across all of Canada</li>
+    <li>Players pay $5 to pick 7 numbers, and if your numbers all match you win the jackpot (you know, like... a lottery)</li>
+    <li>There's a minimum jackpot of $10 million, and a max jackpot of $50 million (changed to $60 million in July 2015)</li>
+    <li>Any integer multiples of $1 million in the jackpot over $50 million are given out separately as "MaxMillions" - with a separate draw for each one</li>
+    <li>All winnings are paid out as a tax-free lump sum (#OhCanada)</li>
+    <li>I've never won*</li>
+  </ul>
+
+  <h2>Jackpot vs. Ticket Sales</h2>
+  <p>
+    I was curious to see whether other people out there are like me - do ticket sales jump way up when the jackpot reaches the max amount?  So I pulled a bunch of lotto data off of the internet, and here's what I found:
+  </p>
+  <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+      <div class="col-md-4"><img src={{ url_for('static', filename='lotto/2010.png') }}></div>
+      <div class="col-md-4"><img src={{ url_for('static', filename='lotto/2011.png') }}></div>
+      <div class="col-md-4"><img src={{ url_for('static', filename='lotto/2012.png') }}></div>
+    </div>
+    <div class="col-md-2"></div>
+  </div>
+  <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+      <div class="col-md-4"><img src={{ url_for('static', filename='lotto/2013.png') }}></div>
+      <div class="col-md-4"><img src={{ url_for('static', filename='lotto/2014.png') }}></div>
+      <div class="col-md-4"><img src={{ url_for('static', filename='lotto/2015.png') }}></div>
+    </div>
+    <div class="col-md-2"></div>
+  </div>
+
+  <p>
+  <small>*Note, I totally legally won &pound;82 in the UK National Lottery when I was a kid.  Bought a stereo - it was the best.</small>
+  </p>
+
+{% endblock %}
+
+
+

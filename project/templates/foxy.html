@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block page_title %}Foxy Shazam!{% endblock %}
+
+{% block css %}
+  <style>
+
+    .tt {
+      position: absolute;
+      width: 400px;
+      /*height: 20px;*/
+      /*padding: 8px;*/
+      /*margin-top: -4px;*/
+      font: 12px sans-serif;
+      pointer-events: none;
+    }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+      display: none;
+    }
+
+    .line {
+      fill: none;
+      stroke: steelblue;
+      stroke-width: 2.0px;
+      pointer-events: stroke;
+      stroke-opacity:0.5;
+    }   
+    .line:hover {
+      stroke-width:2.5px;
+      stroke-opacity:1;
+    }
+  </style>
+{% endblock %}
+
+{% block js %}
+  <script type="text/javascript" src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<h1>Foxy Shazam on YouTube</h1>
+  <p>
+ Recently at work I was listening to the latest Macklemore song: <a href="https://www.youtube.com/watch?v=JGhoLcsr8GA">Downtown</a>, and it was pretty decent (edit: it's an ear-worm, I find myself singing it all the time).  Stylistically very similar to Thrift Shop, but I think it popped up in a YouTube playlist and I let it play through.  At the 1:45 mark I saw this:
+  </p>
+  <img src="/static/foxy/eric.jpg" title="It's like he's staring into my soul">
+  <p>
+  Noice, this guy's got some pipes.  The rest of my morning at work was quickly spoken for - who is this man, and how can I hear more of his music? I really love discovering a new musician that I've never heard before, especially when they have a big back catalogue to dig into.  Doing a bit of googling got me to <a href="http://www.foxyshazam.com">Foxy Shazam</a>.
+  </p>
+  <p>
+  After digging into the music a bit, I wondered how many other people were like me: Blissfully unaware of this band, heard the Macklemore song, and were very quickly fans of the band (which, alas is on hiatus!).  So I wrote up a little script to pull views data out of YouTube for the first page of results for "Foxy Shazam", and played around a bit in Python/d3 to check out the data:
+  </p>
+  
+  <!--Here's the empty stuff to fill with d3 biz-->
+  <h3>Daily views for top 20 Foxy Shazam videos on YouTube</h3>
+  <svg id="chart"></svg>
+  <div id="tt">.</div>
+  
+  
+  <h3>Notes</h3>
+  <ul>
+    <li>Hover over the lines for the title, and click to check out the video itself</li>
+    <li>I couldn't find any kind of documentation about how to get this data out of YouTube - I don't think it's really something upon which it is smiled.  So there were some interesting things with that:
+    <ul>
+        <li>There's probably some way to generate the cookies that are needed to pull data out of YouTube.  I just opened the pages on my browser, and copied the whole payload while changing the video ID when I ran my pull.</li>
+        <li>It took me way to long to figure out how the dates are stored in the data that comes back.  It's a Unix timestamp, which I probably should have assumed.  I wound up pulling the series of dates into Excel, getting the difference between subsequent dates, and eventually just realizing that each had 86,400,000 between them.  Huh, that's a <a href="http://blog.dilbert.com/post/102627992001/big-round-numbers">Big Round Number</a>...</li>
+    </ul>
+    <li>Apparently some YouTube videos just don't have statistics (at least not on my machine).  Odd that, maybe this is another roadblock that YouTube's trying to throw up for this kind of analysis?  Example: <a href="https://www.youtube.com/watch?v=U2QH9fpJSgw">https://www.youtube.com/watch?v=U2QH9fpJSgw</a></li>
+  </ul>
+
+
+  <h2>Thoughts</h2>
+  <ul>
+      <li>Downtown was released on August 27th, and there's an immediate spike up in a bunch of the Foxy Shazam videos.
+      <ul><li><a href="https://www.youtube.com/watch?v=tg4CPaKzSUU">Oh Lord</a> (released March 2010) gets the biggest bump up, to a peak of ~16,000 daily views, and</li>
+          <li><a href="https://www.youtube.com/watch?v=4rz4I69mQMo">I Like It</a> (released February 2012) peaks up around 6,000.</li></ul>
+      <li>Interestingly, <a href="https://www.youtube.com/watch?v=n2IPsu0yYbE">Killin' It</a> (released April 2010), which had the highest daily viewership before the Macklemore album dropped, didn't really spike up at all.  I wonder if that's an artifact of the fact that it's not from an official channel, so it's treated differently by the "recommended videos"/"up next" algorithms on YT's side.</li>
+      <li>Something else happened on or around November 26th.  I tried to figure this out, here was my thought process:
+        <ol>
+            <li>I know there was a performance at the <a href="https://en.wikipedia.org/wiki/2015_MTV_Video_Music_Awards">MTV VMAs</a>, but that was on August 30th...</li>
+            <li>Did anything happen on Macklemore, Eric Nally, or Foxy Shazam's twitter around then? (Answer: nothing I could see)</li>
+            <li>Macklemore was at the American Music Awards on November 22nd-ish?  That's probably not it</li>
+            <li>Was it because of the <a href="https://www.youtube.com/watch?v=1He5-czKE90">Russell Wilson Bose ad</a> featuring the song?  (Answer: no, that came out in October)</li>
+            <li>Did some "advanced googling", for <a href="https://www.google.com/search?q=foxy+shazam+site%3Areddit.com&espv=2&biw=1280&bih=665&source=lnt&tbs=cdr%3A1%2Ccd_min%3A2015-11-24%2Ccd_max%3A2015-11-28&tbm=">mentions of Foxy Shazam on Reddit between the 24th and the 28th of November</a>.  HMMMM, this eventually led me to <a href="https://www.youtube.com/watch?v=lH9Se03t40w">here!</a>, looks like Eric Nally showed up on Jimmy Fallon.  I bet that's it! (check out <a href="https://youtu.be/lH9Se03t40w?t=2m53s">this timestamp</a>)</li>
+        </ol>
+      </li>
+  </ul>
+  <script type="text/javascript">
+    var margin = {top: 20, right: 80, bottom: 30, left: 50},
+        width = 900 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    var x = d3.time.scale()
+        .range([0, width]);
+    var y = d3.scale.linear()
+        .range([height, 0]);
+
+    var color = d3.scale.category20();
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+    
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left");
+
+    var line = d3.svg.line()
+        .interpolate("basis")
+        .x(function(d) { return x(d.day); })
+        .y(function(d) { return y(d.views); });
+
+    var svg = d3.select("#chart")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var tt = d3.select("#tt")
+        .attr("class", "tt")
+        .style("display", "none");
+
+    function mouseover() {
+        tt.style("display", "inline");
+    }
+
+    function mousemove(d) {
+        tt.text(lookup[d.name])
+          .style("left", (d3.event.pageX + 5) + "px")
+          .style("top", (d3.event.pageY - 15) + "px");
+    }
+
+    function mouseout() {
+        tt.style("display", "none");
+    }
+    
+    var lookup;
+    d3.json("{{ url_for('static', filename='foxy/lookup.json') }}", function(error, json) {
+        if (error) return console.warn(error);
+        lookup = json;
+      });
+
+    d3.csv("{{ url_for('static', filename='foxy/vids.csv') }}", function(error, data) {
+        if (error) throw error;
+
+        color.domain(d3.keys(data[0]).filter(function(key) {return key !== "day"; }));
+
+        data.forEach(function(d) {
+          time = +d.day;
+          d.day = new Date(time);
+        });
+
+        var vids = color.domain().map(function(name) {
+          return {
+            name: name,
+            values: data.map(function(d) {
+              return {day: d.day, views: +d[name]};
+            })
+          };
+        });
+
+        x.domain(d3.extent(data, function(d) { return d.day; }));
+        y.domain([
+          d3.min(vids, function(c) { return d3.min(c.values, function(v) { return v.views; }); }),
+          d3.max(vids, function(c) { return d3.max(c.values, function(v) { return v.views; }); })
+        ]);
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+          .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Views");
+        
+        var vid = svg.selectAll(".vid")
+            .data(vids)
+          .enter().append("g")
+            .attr("class", "vid");
+
+        vid.append("path")
+            .attr("class", "line")
+            .attr("d", function(d) { return line(d.values); })
+            .style("stroke", function(d) { return color(d.name); })
+            .on("mouseover", mouseover)
+            .on("mousemove", function(d) { mousemove(d); })
+            .on("mouseout", mouseout)
+            .on("click", function(d) { window.open("https://www.youtube.com/watch?v=" + d.name); });
+
+    });
+
+  </script>
+
+{% endblock %}
+
+
+

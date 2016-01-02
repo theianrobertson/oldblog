@@ -15,9 +15,17 @@ def home():
 def flights():
     return render_template('flights.html')
 
+@app.route('/lotto/')
+def lotto():
+    return render_template('lotto.html')
+
 @app.route('/voronoi/')
 def voronoi():
     return render_template('voronoi.html')
+
+@app.route('/foxy/')
+def foxy():
+    return render_template('foxy.html')
 
 @app.route('/aboutme/')
 def aboutme():
