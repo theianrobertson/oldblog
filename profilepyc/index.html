@@ -1,0 +1,94 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>Profile Pictures</title>
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  
+
+  
+
+
+</head>
+<body class="box">
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <ul class="nav navbar-nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/aboutme/">About Me</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="https://github.com/theianrobertson">Source</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<div class="container" role="main"> 
+    
+<h1>How I prove that I'm alive each day like Fidel Castro</h1>
+
+<p>
+I got this bright idea a while ago that I should post a picture of myself every day holding the newspaper for that date. Kind of like how Fidel Castro proves that he's still alive every little while by publishing a picture of himself holding the newspaper like this:</p>
+<p>
+<img src="/static/profilepyc/fidel-large.jpg" title="Still crushing it">
+</p>
+
+<p>
+This little project would give me an excuse to play around with the <a href="http://www.pythonware.com/products/pil/">Python Imaging Library (PIL)</a> package, and eventually the <a href="https://twython.readthedocs.org/en/latest/">Twython</a> package to post the resulting image to Twitter. </p>
+
+<h2>Let me take a selfie</h2>
+<p>
+The first step was to take a picture of myself holding up a newspaper, and photoshop clone stamp out all of the text/pictures:</p>
+<p>
+  <img src="/static/profilepyc/baseimage.jpg" title="That's me">
+</p>
+
+<h2>Newspapers</h2>
+<p>
+I then found a <a href="http://www.newseum.org/todaysfrontpages/">site</a> which posts front pages of a whole bunch of different newspapers every day.  Figured out the daily pattern for the Globe and Mail front page URL, set up a little scraper, and pulled down the first image:
+</p>
+<p>
+<img src="/static/profilepyc/20160115.jpg" title="Such news">
+</p>
+
+<h2>The tricky part*</h2>
+<p>
+Splicing the two photos together (*it seemed tricky - the actual code is pretty straightforward in the end).  The steps at which I arrived after much experimentation are:
+</p>
+<p>
+<ol>
+  <li>Open both images</li>
+  <li>Gaussian blur the front page a little to match the blur on my original</li>
+  <li>Create a mask by:
+    <ol>
+      <li>Converting the front page to grayscale, which gives me an array of numbers from 0 (black) to 255 (white)</li>
+      <li>Selecting white and almost-white values (>=240 after experimentation) as black, so they would be hidden when I paste, allowing my base and page to show through</li>
+      <li>Applying the mask to the original full-colour front page when pasting</li>
+    </ol></li>
+  <li>Resize and save the combined image. </li>
+</ol>
+</p>
+<p>
+<img src="/static/profilepyc/newimage.jpg" title="Very headlines">
+</p>
+
+<p>
+Then I played around with Twython (wound up being really easy), and posted the picture as my profile image. Scheduled the whole script to run on my raspberry pi, and away it went!</p>
+
+<h2>Lessons learned:</h2>
+<p>
+<ul>
+    <li>Twython is easy-peasy </li>
+    <li>PIL was a bit tricky to get started with, and I do have experience using photoshop so I knew things like "what's a mask?"</li>
+    <li>I'm alive as long as my raspberry pi is running!</li>
+    <li>Once again Python let me build some silly little project without any real difficulty</li>
+</ul>
+</p>
+
+</div>
+
+</div>
+<script src="/static/js/script.js"></script>
+</body>
+</html>

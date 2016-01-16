@@ -27,6 +27,10 @@ def voronoi():
 def foxy():
     return render_template('foxy.html')
 
+@app.route('/profilepyc/')
+def profilepyc():
+    return render_template('profilepyc.html')
+
 @app.route('/aboutme/')
 def aboutme():
     return render_template('aboutme.html')
