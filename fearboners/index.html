@@ -1,0 +1,218 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>The Fear Boners</title>
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  
+
+  
+
+
+</head>
+<body class="box">
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <ul class="nav navbar-nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/aboutme/">About Me</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="https://github.com/theianrobertson">Source</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<div class="container" role="main"> 
+    
+<h1>The Fear Boners</h1>
+<p>So I play in a fantasy football league with some friends, which is called "The Fear Boners", after the <a href="http://thefootballgirl.com/news-and-features/wise-guys-media-watch/the-league-episode-8-fear-boner.html">episode</a> of The League.  In the short (four year) history of the league, I've now won TWICE (eat it), which is approximately 50% of the seasons, by my calculations.</p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Year</th>
+      <th>Team Name</th>
+      <th>Place</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2012</td>
+      <td>Arian Nation</td>
+      <td><strong>1 of 8</strong></td>
+    </tr>
+    <tr>
+      <td>2013</td>
+      <td>Johnsons &amp; Johnsons</td>
+      <td>6 of 8</td>
+    </tr>
+    <tr>
+      <td>2014</td>
+      <td>Mom's Spaghetti</td>
+      <td>7 of 8</td>
+    </tr>
+    <tr>
+      <td>2015</td>
+      <td>#1 Dad</td>
+      <td><strong>1 of 8</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Back in 2012 I kicked ass - I won the first overall draft pick by winning a punt/pass/kick competition, came first overall in the season, and won the playoffs.  This year my team was pretty piss-poor, and I wound up with the fewest points for of any team in the league.  After thanking the <a href="http://www.relevantmagazine.com/life/does-god-care-if-i-wager-fantasy-football">fantasy football gods</a>, I started wondering just how big of a fluke it was that I had won this year.  Fired up some Python and set to work figuring it out:</p>
+
+<hr>
+
+<h3>I had no business making the playoffs this year.</h3>
+<div class="row">
+  <div class="col-md-3 col-sm-6">
+    <h5>#1 Dad</h5>
+    <p>Playoffs: 5.5%</p>
+    <img src="/static/fearboners/1Dad.png">
+  </div>
+  <div class="col-md-3 col-sm-6">
+    <h5>Cats In A Sink</h5>
+    <p>Playoffs: 40.8%</p>
+    <img src="/static/fearboners/CatsInASink.png">
+  </div>
+    <div class="col-md-3 col-sm-6">
+    <h5>Maximo Plaxico</h5>
+    <p>Playoffs: 10.6%</p>
+    <img src="/static/fearboners/MaximoPlaxico.png">
+  </div>
+    <div class="col-md-3 col-sm-6">
+    <h5>Sacky McSackerson</h5>
+    <p>Playoffs: 99.7%</p>
+    <img src="/static/fearboners/SackyMcSackerson.png">
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-3 col-sm-6">
+    <h5>The Brown Notes</h5>
+    <p>Playoffs: 71.3%</p>
+    <img src="/static/fearboners/TheBrownNotes.png">
+  </div>
+  <div class="col-md-3 col-sm-6">
+    <h5>The Gurley Men</h5>
+    <p>Playoffs: 7.6%</p>
+    <img src="/static/fearboners/TheGurleyMen.png">
+  </div>
+    <div class="col-md-3 col-sm-6">
+    <h5>The Toilet Kitchens</h5>
+    <p>Playoffs: 74.1%</p>
+    <img src="/static/fearboners/TheToiletKitchens.png">
+  </div>
+    <div class="col-md-3 col-sm-6">
+    <h5>Wakywakyeggsnbakey!</h5>
+    <p>Playoffs: 90.1%</p>
+    <img src="/static/fearboners/Wakywakyeggsnbakey.png">
+  </div>
+</div>
+
+<p>Since the teams were randomly seeded against each other, I could just use the same game schedule, but switch up which teams were assigned to which "team number".  Since there's 8 teams, there were 40,320 (8P8) possible combinations.</p>
+<p>I scored out all of the games in each of those seasons, and figured out the final standings.  We have an unnecessarily complex tie-breaker (number of weekly wins, then head-to-head record, then total points for), so that added some more wrinkles to the calculation.</p>
+<p>In our league the top 4 teams make the playoffs, and the bottom 4 teams make the "Sacko" playoffs, i.e. they compete to <strong>not</strong> come in last place.  I was only supposed to finish in the top 4 teams in 5.5% of the seasons!</p>
+
+<hr>
+
+<h3>And I should have done slightly worse in the playoffs</h3>
+<p>If I run my simulations out to the end of the playoffs (weeks 14-16), here's the percent of seasons won/lost by each team:</p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Team</th>
+      <th>Real Season Placing</th>
+      <th>Real Playoff Placing</th>
+      <th>Champ!</th>
+      <th>Sacko :(</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>The Brown Notes</td>
+      <td>6th</td>
+      <td></td>
+      <td>69.2%</td>
+      <td>0.0%</td>
+    </tr>
+    <tr>
+      <td>The Toilet Kitchens</td>
+      <td>5th</td>
+      <td></td>
+      <td>22.0%</td>
+      <td>0.0%</td>
+    </tr>
+    <tr>
+      <td>Sacky McSackerson</td>
+      <td>1st</td>
+      <td></td>
+      <td>3.6%</td>
+      <td>0.0%</td>
+    </tr>
+    <tr>
+      <td>#1 Dad</td>
+      <td>2nd</td>
+      <td>Champ!</td>
+      <td>2.9%</td>
+      <td>23.5%</td>
+    </tr>
+    <tr>
+      <td>Maximo Plaxico</td>
+      <td>8th</td>
+      <td></td>
+      <td>2.2%</td>
+      <td>0.9%</td>
+    </tr>
+    <tr>
+      <td>Cats In A Sink</td>
+      <td>4th</td>
+      <td></td>
+      <td>0.02%</td>
+      <td>9.5%</td>
+    </tr>
+    <tr>
+      <td>Wakywakyeggsnbakey!</td>
+      <td>3rd</td>
+      <td></td>
+      <td>0.0%</td>
+      <td>4.7%</td>
+    </tr>
+    <tr>
+      <td>The Gurley Men</td>
+      <td>7th</td>
+      <td>Sacko :(</td>
+      <td>0.0%</td>
+      <td>61.3%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Dang, The Brown Notes could have been the champs in almost 70% of season iterations.  And they didn't even make the playoffs in real life!</p>
+
+<hr>
+
+<h3>So what?</h3>
+<p>Here's what I'm taking away from this analysis:</p>
+<ul>
+  <li>I had no business making the playoffs</li>
+  <li>The Brown Notes are probably real pissed off at me</li>
+  <li>I'm reeeeeeally good at fantasy football</li>
+</ul>
+<hr>
+<small>
+<p>Note: I can't guarantee that everyone started the players they would have started normally in the playoffs, due to how byes worked.  I'm just not going to consider that, so the regular season stuff is probably a bit more accurate than the playoff stuff.  Also I assume some people try to play a matchup with the fantasy team their playing against, so that could change things week-to-week too.  I don't do that though, and I won the league so there.</p>
+</small>
+
+<img class="center-block" src="/static/fearboners/Dads.png">
+<div class="text-center"><small>go #1 dads!</small></div>
+
+</div>
+
+</div>
+<script src="/static/js/script.js"></script>
+</body>
+</html>
