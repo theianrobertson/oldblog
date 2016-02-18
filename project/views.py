@@ -15,6 +15,14 @@ def home():
 def flights():
     return render_template('flights.html')
 
+@app.route('/statscan/')
+def statscan():
+    return render_template('statscan.html')
+
+@app.route('/fearboners/')
+def fearboners():
+    return render_template('fearboners.html')
+
 @app.route('/lotto/')
 def lotto():
     return render_template('lotto.html')
