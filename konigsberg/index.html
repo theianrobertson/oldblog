@@ -1,0 +1,143 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>The Seven Bridges of Königsberg</title>
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  <link rel="shortcut icon" href="/static/favicon.ico">
+  
+<style>
+  code {
+    background-color: #FFFFFF;
+  }
+
+  .cm-keyword {
+    color: #3498db;
+  }
+  .cm-node {
+    color: #e74c3c;
+  }
+  .cm-atom {
+    color: #9b59b6;
+  }
+  .cm-string {
+    color: #e67e22;
+  }
+  .cm-variable {
+    color: #1abc9c;
+  }
+</style>
+
+  
+
+
+</head>
+<body class="box">
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <ul class="nav navbar-nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/aboutme/">About Me</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="https://github.com/theianrobertson">Source</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<div class="container" role="main"> 
+    
+<h1>The Seven Bridges of Königsberg</h1>
+<p>Recently I've been playing around with <a href="http://neo4j.com/">Neo4j</a> quite a bit at work.  Neo4j is a pretty decent graph database, i.e. you can create nodes and relationships, and each node & relationship has a label and any number of properties.  Then Neo4j provides a language called Cypher which lets you find traversals, neighbour nodes, etc.  It plays nicely with API endpoints too.</p>
+<p>The <a href="https://en.wikipedia.org/wiki/Seven_Bridges_of_K%C3%B6nigsberg">Seven Bridges of Königsberg</a> problem came up when I was putting together a demonstration of what Neo4j does.  It's a famous problem in graph theory (maybe the first).  It's relatively straightforward to state:</p>
+<h2>Problem Statement</h2>
+<p><img src="/static/konigsberg/euler.png"></p>
+<p>The city of Königsberg in Prussia (now Kaliningrad, Russia) was set on both sides of the Pregel River, and included two large islands which were connected to each other and the mainland by seven bridges. The problem was to devise a walk through the city that would cross each bridge once and only once, with the provisos that: the islands could only be reached by the bridges and every bridge once accessed must be crossed to its other end. The starting and ending points of the walk need not be the same.</p>
+<p>Obviously (because he proved pretty much everything else) Leonhard Euler proved that there was no solution.  But how much faster could he have gone if he had Neo4j?!</p>
+
+<h2>Some Cypher</h2>
+<p>Here's how I set up the problem in Neo4j using Cypher:</p>
+<code>
+<div style="position: relative;">
+<span class="cm-keyword">CREATE </span><span class="cm-node">(</span><span class="cm-atom">kp:Island </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">"Kneiphof"</span><span class="cm-node">})</span></div>
+
+<div style="position: relative;">
+<span class="cm-keyword">CREATE </span><span class="cm-node">(</span><span class="cm-atom">kn:Mainland </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">"Königsberg N"</span><span class="cm-node">})</span></div>
+
+<div style="position: relative;">
+<span class="cm-keyword">CREATE </span><span class="cm-node">(</span><span class="cm-atom">ks:Mainland </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">"Königsberg S"</span><span class="cm-node">})</span></div>
+
+<div style="position: relative;">
+<span class="cm-keyword">CREATE </span><span class="cm-node">(</span><span class="cm-atom">ei:Island </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">"East Island"</span><span class="cm-node">})</span></div>
+
+<div style="position: relative;">
+<span class="cm-keyword">CREATE</span></div>
+
+<div style="position: relative;">
+&nbsp;<span class="cm-node">(</span><span class="cm-variable">kp</span><span class="cm-node">)</span>-<span class="cm-node">[</span><span class="cm-variable">:BRIDGE_TO </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">"kp:kn1"</span><span class="cm-node">}]</span>-&gt;<span class="cm-node">(</span><span class="cm-variable">kn</span><span class="cm-node">),</span></div>
+
+<div style="position: relative;">
+&nbsp;<span class="cm-node">(</span><span class="cm-variable">kp</span><span class="cm-node">)</span>-<span class="cm-node">[</span><span class="cm-variable">:BRIDGE_TO </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">"kp:kn2"</span><span class="cm-node">}]</span>-&gt;<span class="cm-node">(</span><span class="cm-variable">kn</span><span class="cm-node">),</span></div>
+
+<div style="position: relative;">
+&nbsp;<span class="cm-node">(</span><span class="cm-variable">kp</span><span class="cm-node">)</span>-<span class="cm-node">[</span><span class="cm-variable">:BRIDGE_TO </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">"kp:ks1"</span><span class="cm-node">}]</span>-&gt;<span class="cm-node">(</span><span class="cm-variable">ks</span><span class="cm-node">),</span></div>
+
+<div style="position: relative;">
+&nbsp;<span class="cm-node">(</span><span class="cm-variable">kp</span><span class="cm-node">)</span>-<span class="cm-node">[</span><span class="cm-variable">:BRIDGE_TO </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">
+"kp:ks2"</span><span class="cm-node">}]</span>-&gt;<span class="cm-node">(</span><span class="cm-variable">ks</span><span class="cm-node">),</span></div>
+
+<div style="position: relative;">
+&nbsp;<span class="cm-node">(</span><span class="cm-variable">kp</span><span class="cm-node">)</span>-<span class="cm-node">[</span><span class="cm-variable">:BRIDGE_TO </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">"kp:ei"</span><span class="cm-node">}]</span>-&gt;<span class="cm-node">(</span><span class="cm-variable">ei</span><span class="cm-node">),</span></div>
+
+<div style="position: relative;">
+&nbsp;<span class="cm-node">(</span><span class="cm-variable">kn</span><span class="cm-node">)</span>-<span class="cm-node">[</span><span class="cm-variable">:BRIDGE_TO </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">"kn:ei"</span><span class="cm-node">}]</span>-&gt;<span class="cm-node">(</span><span class="cm-variable">ei</span><span class="cm-node">),</span></div>
+
+<div style="position: relative;">
+&nbsp;<span class="cm-node">(</span><span class="cm-variable">ks</span><span class="cm-node">)</span>-<span class="cm-node">[</span><span class="cm-variable">:BRIDGE_TO </span><span class="cm-node">{</span><span class="cm-atom">name:</span><span class="cm-string">"ks:ei"</span><span class="cm-node">}]</span>-&gt;<span class="cm-node">(</span><span class="cm-variable">ei</span><span class="cm-node">)</span></div>
+</code>
+
+<p>First things first create the nodes and relationships which represent the land masses and bridges.  Pulling these up in the Neo4j browser looks like this:</p>
+<p><img src="/static/konigsberg/neo4j.png"></p>
+<p>So far, so good.</p>
+
+<h2>Looking for traversals</h2>
+<p>The problem simplifies to "look for traversals of this graph".  That's easy-peasy in Cypher - this code looks for unique paths where two nodes (n and m) are joined by some number of unique "BRIDGE_TO" relationships, and returns the path and the length of the path:</p>
+<code>
+<div style="position: relative;">
+<span class="cm-keyword">MATCH </span><span class="cm-variable">path</span>=<span class="cm-node">(</span><span class="cm-variable">n</span><span class="cm-node">)</span>-<span class="cm-node">[</span><span class="cm-atom">rels:BRIDGE_TO</span>*<span class="cm-node">]</span>-<span class="cm-node">(</span><span class="cm-variable">m</span><span class="cm-node">)</span></div>
+
+<div style="position: relative;">
+<span class="cm-keyword">RETURN </span><span class="cm-builtin">LENGTH</span><span class="cm-node">(</span><span class="cm-variable">path</span><span class="cm-node">) </span><span class="cm-variable">AS </span><span class="cm-variable">number_of_bridges_crossed</span><span class="cm-node">, </span><span class="cm-variable">path</span></div>
+
+<div style="position: relative;">
+<span class="cm-keyword">ORDER </span><span class="cm-keyword">BY </span><span class="cm-builtin">LENGTH</span><span class="cm-node">(</span><span class="cm-variable">path</span><span class="cm-node">) </span><span class="cm-variable">DESCENDING</span></div>
+</code>
+<p>And we're pretty much done - This returns all sub-paths of graph with no repeated bridge crossings.  Exporting to csv and checking out a length-2 path gives me:</p>
+<code>
+[{"name":"East Island"},{"name":"kn:ei"},{"name":"Königsberg N"},{"name":"kp:kn1"},{"name":"Kneiphof"}]
+</code>
+<p>
+i.e., this is a path that goes from East Island to Königsberg North to Kneiphof (on Kneiphof-North bridge #1).  The number_of_bridges_crossed variable only goes up to 6, which shows that there isn't a valid path which hits seven bridges.  Slightly more succinctly though, this just pulls all of the paths which are of length 7 (i.e. hits seven bridges):
+</p>
+<code>
+<div style="position: relative;">
+<span class="cm-keyword">MATCH </span><span class="cm-variable">path</span>=<span class="cm-node">(</span><span class="cm-variable">n</span><span class="cm-node">)</span>-<span class="cm-node">[</span><span class="cm-atom">rels:BRIDGE_TO</span>*<span class="cm-node">]</span>-<span class="cm-node">(</span><span class="cm-variable">m</span><span class="cm-node">)</span></div>
+
+<div style="position: relative;">
+<span class="cm-keyword">WHERE </span><span class="cm-builtin">LENGTH</span><span class="cm-node">(</span><span class="cm-variable">path</span><span class="cm-node">) </span>= <span class="cm-variable">7</span></div>
+
+<div style="position: relative;">
+<span class="cm-keyword">RETURN </span><span class="cm-variable">path</span></div>
+
+</code>
+<p>This gives me "(no rows)".  Quod Erat Demonstrandum.
+</p>
+
+
+</div>
+
+</div>
+<script src="/static/js/script.js"></script>
+</body>
+</html>
