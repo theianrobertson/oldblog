@@ -1,0 +1,160 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>Toronto Transit Time</title>
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  <link rel="shortcut icon" href="/static/favicon.ico">
+  
+  <style>
+    /*.pol-tims { fill: #C23440; }*/
+    #chart path {
+      opacity: 0.6;
+    }
+    #chart path:hover {
+      opacity: 0.9;
+    }
+  </style>
+
+  
+  <script type="text/javascript" src="/static/js/d3.min.js"></script>
+
+
+</head>
+<body class="box">
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <ul class="nav navbar-nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/aboutme/">About Me</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="https://github.com/theianrobertson">Source</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<div class="container" role="main"> 
+    
+<h1>Toronto Transit Timing</h1>
+  <svg id="chart"><defs><clipPath id="clipper"></clipPath></defs></svg>
+  <div id="descriptor">.</div>
+  <h2>What's This?</h2>
+  <p>I thought it might be kind of cool to colour a map of Toronto based on how long it would take you to travel to the financial district on transit.  Originally I thought maybe I could do something where a user picked an address, but I decided to just do the one address thing to start.</p>
+  <h2>How'd I do it?</h2>
+  <p>I used the <a href="https://developers.google.com/maps/documentation/directions/">Google Maps Directions API</a> to get directions from randomly selected points in Toronto city limits to the corner of Bay and King.  Then I used D3's built-in Voronoi diagram generator to generate a <a href="https://en.wikipedia.org/wiki/Voronoi_diagram">Voronoi diagram</a> with those points, with polygons coloured by the time it would take to get to Bay & King from that point.</p>
+  <h2>Why'd I do it?</h2>
+  <p>I dunno, pretty colours I think.  It could be kind of a neat output to loop into a house price estimator, but for now it's just a pretty picture.</p>
+  <h2>Notes</h2>
+  <ul>
+    <li>I used a Monday morning in a week's time to pull data, to try and avoid any weird daily effects and hit just the "average" day in the life.</li>
+    <li>Routes were calculated to get to the place by 9:00 am.</li>
+    <li>I opted to get alternative routes, then picked the fastest one out of the list.</li>
+  </ul>
+  <script type="text/javascript">
+    var height = 700;
+    var width = 900;
+    var vertices = [];
+    var rt = [];
+    var pathv = [];
+
+    var chart = d3.select("#chart")
+        .attr("width", width)
+        .attr("height", height)
+
+    function timeText(t) {
+      tt = '';
+      if (t >= 3600) { 
+        hours = (t / 3600).toFixed();
+        if (hours > 1) {
+          tt = String(hours).concat(' hours, ');  
+        } else {
+          tt = String(hours).concat(' hour, ');
+        }
+        t = t % 3600;
+      }
+      minutes = (t / 60).toFixed();
+      if (minutes > 1) {
+        tt = tt.concat(String(minutes).concat(' minutes'));
+      } else {
+        tt = tt.concat(String(minutes).concat(' minute'));
+      }
+      return tt;
+    }
+
+    var projection = d3.geo.mercator()
+        .center([-79.378058,43.7182412])
+        .scale(95000)
+        .translate([width / 2, height / 2]);
+
+    var voronoi = d3.geom.voronoi()
+        .clipExtent([[0, 0], [width, height]])
+        .x(function(d) { return projection([d.lon, d.lat])[0]; })
+        .y(function(d) { return projection([d.lon, d.lat])[1]; });
+
+    function polygon(d) {
+      return "M" + d.join("L") + "Z";
+    }
+
+    d3.json("/static/voronoi/toronto.json", function(error, data) {
+
+      data.forEach(function(d,i) {
+        pathv.push(projection([d.lon,d.lat]));
+      });
+
+      var outer = d3.select("#clipper")
+          .datum(pathv)
+          //.attr("transform", function(d, i) { return "translate(" + projection([d.lon,d.lat]) + ")"; })
+
+      outer.append("path")
+          .attr("d", function(d) {return polygon(d);});
+
+    });
+
+    d3.json("/static/torontotransit/points.json", function(error, data) {
+      if (error) return console.error(error);
+
+      data.forEach(function(d,i) {
+        vertices.push(projection([+d.lon, +d.lat]));
+        rt.push(+d.rt);
+      });
+
+      var colour = d3.scale.linear()
+        .domain([d3.min(rt), d3.mean(rt), d3.max(rt)])
+        .range(['green', 'yellow', 'red']);
+
+      var spot = chart.selectAll("g.spots")
+          .data(data)
+        .enter().append("g")
+          .attr("transform", function(d, i) { return "translate(" + projection([d.lon,d.lat]) + ")"; })
+          .attr("class", "spot");
+
+      spot.append("circle")
+          .attr("r", 1);
+
+      var path = chart.selectAll("path")
+          .data(voronoi(data))
+        .enter().append("path")
+          .attr("class", "pol-tims")
+          .attr("clip-path", "url(#clipper)")
+          .attr("fill", function(d, i) {return colour(data[i].rt);})
+          .attr("d", function(d) {return polygon(d);})
+          .on("mouseover", function(d, i) {
+            document.getElementById('descriptor').innerHTML = timeText(data[i].rt);
+          })
+          .on("mouseout", function(d, i) {
+            document.getElementById('descriptor').innerHTML = ".";
+          });
+
+    });
+
+  </script>
+
+
+</div>
+
+</div>
+<script src="/static/js/script.js"></script>
+</body>
+</html>

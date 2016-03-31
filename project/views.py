@@ -15,6 +15,10 @@ def home():
 def adayinthelife():
     return render_template('adayinthelife.html')
 
+@app.route('/torontotransit/')
+def torontotransit():
+    return render_template('torontotransit.html')
+
 @app.route('/konigsberg/')
 def konigsberg():
     return render_template('konigsberg.html')
