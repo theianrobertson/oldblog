@@ -58,3 +58,15 @@ def profilepyc():
 @app.route('/aboutme/')
 def aboutme():
     return render_template('aboutme.html')
+
+@app.route('/bigmclargehuge/')
+def bigmclargehuge():
+    return render_template('bigmclargehuge.html')
+
+@app.route('/apply/')
+def apply():
+    return render_template('apply.html')
+
+@app.route('/resume/')
+def resume():
+    return render_template('resume.html')

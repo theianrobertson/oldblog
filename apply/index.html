@@ -1,0 +1,165 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>Considered Harmful</title>
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  <link rel="shortcut icon" href="/static/favicon.ico">
+  
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+
+  
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+</head>
+<body class="box">
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <ul class="nav navbar-nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/aboutme/">About Me</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="https://github.com/theianrobertson">Source</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<div class="container" role="main"> 
+    
+<h1>DataFrame.apply Considered Harmful</h1>
+  <p>
+ What follows is a lesson learned from using Python and Pandas for data science. It's probably nothing new, but I wasn't aware of it at first, so there.  Note, I don't actually believe that this function is *harmful* per se, but I do think that you should know what kind of tradeoffs there are in speed.  I think it's just a trope by now to say something is "considered harmful".</p>
+<h3>Problem Statement, or, How I Used To Write Pandas Code</h3>
+<p>
+In my life writing SQL for analysis, I often come across this kind of function:
+
+<pre><code class="sql">SELECT
+    CASE
+        WHEN a = 'hi' OR b = 'yo' THEN 'case 1'
+        WHEN a = 'hi' THEN 'case 2'
+        WHEN c > 100 AND c <= 400 THEN 'case 3'
+        WHEN c = 0 THEN 'case 4'
+        WHEN 'a' IN ('yo', 'what', 'huh') AND b <> 'yo' THEN 'case 5'
+        ELSE 'case 6'
+    END AS case_fld
+FROM
+    some_table
+</code></pre>
+
+Which is a pattern that's all well and good in relational databases.  (Whether or not it makes for "best practices")</p>
+
+<p>
+Replicating this logic seems easy to do in Pandas, by using the "apply" function.  It even looks pretty similar to the SQL syntax:
+
+<pre><code class="python">def naive_case(row):
+    if row['a'] == 'hi' or row['b'] == 'yo':
+        return 'case 1'
+    if row['a'] == 'hi':
+        return 'case 2'
+    if 100 < row['c'] <= 400:
+        return 'case 3'
+    if row['c'] == 0:
+        return 'case 4'
+    if row['a'] in ('yo', 'what', 'huh') and row['b'] != 'yo':
+        return 'case 5'
+    else:
+        return 'case 6'
+
+df['case_fld'] = df.apply(naive_case, axis=1)
+</code></pre>
+
+This pattern also seems to work out well, and generates accurate results. But what happens when you run this code over a dataframe with "big" data? Note, not BIG big data, but let's say a million rows. Small enough to easily fit in memory, but large enough that you start thinking
+about performance.  Say a million rows?  Let's try it out, shall we?  Building a random dataframe with some data in it:
+
+<pre><code class="python">import pandas as pd
+import numpy as np
+import time
+
+a_list = ['hi', 'yo', 'what', 'huh', 'weird']
+b_list = ['yo', 'hi']
+c_list = [0, 100, 200, 300, 400, 500, 600, 700]
+size = 1000000
+test_frame = pd.DataFrame({
+    'a': np.random.choice(a_list, size=size),
+    'b': np.random.choice(b_list, size=size),
+    'c': np.random.choice(c_list, size=size)
+    })
+
+start_time = time.time()
+test_frame['d'] = test_frame.apply(naive_case, axis=1)
+print('Naive: {0:.2f}'.format(time.time() - start_time))
+</code></pre>
+The <code>apply</code> function runs in <strong>34.44 seconds</strong> (all times are running on a macbook pro).  Not about to win any races.
+</p>
+<h3>What's better?</h3>
+<p>
+I can't remember where I read it now, but the best advice I've seen about Pandas is to get the notion of a *row* out of your head, and think about things in terms of *columns*.  In a non-columnar relational database, you can safely keep the idea of a row in your head when you're calculating things, but in Pandas you want to think of calculations as vector calculations on columns.  As such, you can reformat the above <code>CASE</code> statement into a series of functions on the columns of your dataframe:
+<pre><code class="python">def series_case(dataframe):
+    a_hi = dataframe['a'] == 'hi'
+    b_yo = dataframe['b'] == 'yo'
+    c_in_range = (dataframe['c'] > 100) & (dataframe['c'] <= 400)
+    c_0 = dataframe['c'] == 0
+    a_in_list = dataframe['a'].isin(('yo', 'what', 'huh'))
+
+    #First create a dummy series that you'll return, with your "ELSE" value
+    to_return = pd.Series(['case 6'] * dataframe.shape[0], index=dataframe.index)
+    
+    #Then "roll-up" your case statement
+    to_return.loc[a_in_list & -b_yo] = 'case 5'
+    to_return.loc[c_0] = 'case 4'
+    to_return.loc[c_in_range] = 'case 3'
+    to_return.loc[a_hi] = 'case 2'
+    to_return.loc[a_hi | b_yo] = 'case 1'
+
+    return to_return
+
+start_time = time.time()
+test_frame['e'] = series_case(test_frame)
+print('Series: {0:.2f}'.format(time.time() - start_time))
+</code></pre>
+This version completed in <strong>0.33 seconds</strong>!  One percent of the time of the <code>df.apply</code> version!  That's amazing!
+</p>
+<p>
+A couple of things to call out here:
+<ul>
+    <li>You have to "reverse" the logic in your <code>CASE</code> statement - the logic is coded "backwards" compared to the SQL version.</li>
+    <li>I like the first 5 lines of the function where it's defining a few boolean arrays - this is optional and you could put <code>to_return.loc[dataframe['c'] == 0] = 'case 4'</code> for example, but I think splitting them out helps with readability and testability.</li>
+</ul>
+</p>
+<h3>What about Series.apply?</h3>
+<p>My next question was whether the same speedups would be seen when Pandas was just <code>apply</code>-ing a function on one column.  So for this example I want to calculate <code>5x^2 + 2.4x + 18.3</code> for some column x:
+<pre><code class="python">def naive_func(value):
+    return 5 * value ** 2 + 2.4 * value + 18.3
+
+def series_func(series):
+    return 5 * series ** 2 + 2.4 * series + 18.3
+
+size = 50000000
+naive_frame = pd.DataFrame({'a': np.random.uniform(size=size)})
+series_frame = naive_frame.copy()
+
+start_time = time.time()
+naive_frame['b'] = naive_frame['a'].apply(naive_func)
+print('Naive: {0:.2f}'.format(time.time() - start_time))
+
+start_time = time.time()
+series_frame['b'] = series_func(series_frame['a'])
+print('Series: {0:.2f}'.format(time.time() - start_time))
+</code></pre>
+The <code>Series.apply</code> version takes <strong>20.4 seconds</strong> to run on 50 million records here, while the series version takes <strong>1.31 seconds</strong>.  Not as extreme of a speedup here, but it's still only ~6% of the time.
+</p>
+<h3>Conclusion</h3>
+<p>
+I'm pretty keen to completely avoid the <code>apply</code> functions in Pandas.  There may be places where you need to use it, but I would recommend you at very least do some testing!
+</p>
+
+</div>
+
+</div>
+<script src="/static/js/script.js"></script>
+</body>
+</html>
