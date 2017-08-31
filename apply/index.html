@@ -72,8 +72,8 @@ Replicating this logic seems easy to do in Pandas, by using the "apply" function
 df['case_fld'] = df.apply(naive_case, axis=1)
 </code></pre>
 
-This pattern also seems to work out well, and generates accurate results. But what happens when you run this code over a dataframe with "big" data? Note, not BIG big data, but let's say a million rows. Small enough to easily fit in memory, but large enough that you start thinking
-about performance.  Say a million rows?  Let's try it out, shall we?  Building a random dataframe with some data in it:
+This pattern also seems to work out well, and generates accurate results. But what happens when you run this code over a dataframe with "big" data? Note, not BIG big data, but let's say a million rows. Small enough to fit in memory, but large enough that you start thinking
+about performance.  Let's try it out, shall we?  Building a random dataframe with some data in it:
 
 <pre><code class="python">import pandas as pd
 import numpy as np
