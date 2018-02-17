@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block page_title %}Every TO Address{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block content %}
+<h1>@EveryTOAddress</h1>
+<img src="{{ url_for('static', filename='address/houses.jpg') }}" height="300" width="300">
+<h2>What's This?</h2>
+<p>This little Twitter bot was inspired by the <a href="https://twitter.com/everylotnyc">@everylotnyc</a> Twitter profile, which posts Google streetview shots of all addresses in New York City that I stumbled across.</p>
+<p>I'd been looking to build something on top of some <a href="https://www.toronto.ca/city-government/data-research-maps/open-data/">Toronto open data</a>, and this seemed like a good option.</p>
+<h2>How it do?</h2>
+<ul>
+<li>I used the <a href="https://www.toronto.ca/city-government/data-research-maps/open-data/open-data-catalogue/#f71a13c4-fb51-6116-57b7-1f51a8190585">Toronto One Address Repository</a> to get a master list of addresses.</li>
+<li>After some testing, it looked like searching for <pre>{street number} {street name}, Toronto ON Canada</pre> would return the right spot from the streetview API.</li>
+<li>From there it was just a matter of messing around with some of the settings on the API calls, setting it up to download the picture and metadata, and post to Twitter with Twython!</li>
+<li>Then I scheduled it on my Raspberry Pi, after trying to remember how to get its IP address again</li>
+</ul>
+<h2>Why'd I do it?</h2>
+<p>I dunno, just messing about with Twitter I guess.  Toronto has some neat houses in it though, and it's kind of delightful seeing them pop up in my Twitter feed a couple of times a day.</p>
+<h2>Notes</h2>
+<ul>
+<li>Code at <a href="https://github.com/theianrobertson/toronto-streetview">toronto-streetview</a></li>
+<li>Bot is live (as of 2017) at <a href="https://twitter.com/EveryTOAddress">@EveryTOAddress</a></li>
+</ul>
+
+{% endblock %}
+
+
+
