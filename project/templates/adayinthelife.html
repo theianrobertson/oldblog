@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block page_title %}A Day in the Life{% endblock %}
+
+{% block css %}
+  <style>
+    .cars circle { fill: #C23440; }
+  </style>
+{% endblock %}
+
+{% block js %}
+  <script type="text/javascript" src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<h1>A Day in the Life</h1>
+  <p>
+  Checking things out.
+  </p>
+  <svg id="chart"><defs><clipPath id="clipper"></clipPath></defs></svg>
+  <div id="descriptor">.</div>
+  <script type="text/javascript">
+    var myInterval;
+    var currNum = 0;
+    var height = 500;
+    var width = 900;
+    var vertices = [];
+    var pathv = [];
+    var car;
+
+    var chart = d3.select("#chart")
+        .attr("width", width)
+        .attr("height", height)
+
+    var projection = d3.geo.mercator()
+        .center([-79.378058,43.65])
+        .scale(285000)
+        .translate([width / 2, height / 2]);
+
+    var voronoi = d3.geom.voronoi()
+        .clipExtent([[0, 0], [width, height]])
+        .x(function(d) { return projection([d.lon, d.lat])[0]; })
+        .y(function(d) { return projection([d.lon, d.lat])[1]; });
+
+    function polygon(d) {
+      return "M" + d.join("L") + "Z";
+    }
+
+
+    d3.json("{{ url_for('static', filename='voronoi/toronto.json') }}", function(error, data) {
+
+      data.forEach(function(d,i) {
+        pathv.push(projection([d.lon,d.lat]));
+      });
+
+      var outer = d3.select("#clipper")
+          .datum(pathv)
+          //.attr("transform", function(d, i) { return "translate(" + projection([d.lon,d.lat]) + ")"; })
+
+      outer.append("path")
+          .attr("d", function(d) {return polygon(d);});
+
+    });
+
+    d3.json("{{ url_for('static', filename='adayinthelife/fileout.json') }}", function(error, data) {
+      data.forEach(function(d,i) {
+        vertices.push(d);
+      });
+
+      car = chart.selectAll("g.cars")
+          .data(data.slice(0,1))
+        .enter().append("g")
+          .attr("transform", function(d, i) { return "translate(" + projection([d.lon,d.lat]) + ")"; })
+          .attr("class", "cars");
+
+      car.append("circle")
+          .attr("r", 3);
+    });
+
+    var aniFunc = function() {
+      currNum++;
+      car.attr("transform", function() {return "translate(" + projection([vertices[currNum].lon, vertices[currNum].lat]) + ")"; });
+    }
+    
+    myInterval = window.setInterval(aniFunc, 30);
+
+
+  </script>
+
+{% endblock %}
+
+
+

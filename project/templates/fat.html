@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block page_title %}Fat{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block content %}
+<h1>How Fat Are We?</h1>
+<p>A while back I was looking at the statistic that if you collected all the gold ever mined in the world, it would be a <a href="http://www.bbc.com/news/magazine-21969100">cube of side length 20m</a>.  I had a really gross thought on the subway the other day:</p>
+<blockquote>
+  <p>How much excess fat is there in the world?  Like, if you could group all the excess fat into a big blob, how big would it be?</p>
+</blockquote>
+<p>This question got under my skin (har har), so I set out to figure it out.  I started (and finished) with Canada, because I'm from Canada.</p>
+<h2>Some Data</h2>
+<p>After digging around the Stats Canada page for a while and not finding much that was very helpful (read: the Stats Canada site is pretty trash), I found <a href="http://www.statcan.gc.ca/pub/82-625-x/2015001/article/14185-eng.htm">this page</a>, which has self-reported obesity and overweight data.  The data's from 2014 for <em>most</em> Canadian adults, which is pretty decent.  Pen, meet back of the envelope.  First, the numbers:</p>
+<ul>
+  <li>If you took all the excess body mass in Canadian adults, it would be a cube with side length 58 metres!</li>
+  <li>To put that in more Canadian terms, you could fill every indoor ice rink in Canada to a depth of almost 5 centimetres with excess body mass!</li>
+  <li>That's gross!</li>
+</ul>
+<h2>How I calculated things:</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="text-center">Metric</th>
+          <th class="text-center">Value (Men)</th>
+          <th class="text-center">Value (Women)</th>
+          <th class="text-center">Source (if not mentioned, from the statscan link above)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="text-center">Average Height (cm)</td>
+          <td class="text-center">174</td>
+          <td class="text-center">161</td>
+          <td class="text-center"><a href="http://www.disabled-world.com/artman/publish/height-chart.shtml">google</a></td>
+        </tr>
+        <tr>
+          <td class="text-center">Population</td>
+          <td class="text-center">13.3M</td>
+          <td class="text-center">13.2M</td>
+          <td class="text-center"></td>
+        </tr>
+        <tr>
+          <td class="text-center">Overweight (%)</td>
+          <td class="text-center">40.0</td>
+          <td class="text-center">27.5</td>
+          <td class="text-center"></td>
+        </tr>
+        <tr>
+          <td class="text-center">Obese (%)</td>
+          <td class="text-center">21.8</td>
+          <td class="text-center">18.7</td>
+          <td class="text-center"></td>
+        </tr>
+        <tr>
+          <td class="text-center">Max "normal" weight for average height (kg)</td>
+          <td class="text-center">74.5</td>
+          <td class="text-center">66</td>
+          <td class="text-center"></td>
+        </tr>
+        <tr>
+          <td class="text-center">"Extra" weight per overweight person (kg)*</td>
+          <td class="text-center">7.45</td>
+          <td class="text-center">6.60</td>
+          <td class="text-center"></td>
+        </tr>
+        <tr>
+          <td class="text-center">"Extra" weight per obese person (kg)**</td>
+          <td class="text-center">22.35</td>
+          <td class="text-center">19.80</td>
+          <td class="text-center"></td>
+        </tr>
+        <tr>
+          <td class="text-center">Total "extra" weight (kg)</td>
+          <td class="text-center">104.4M</td>
+          <td class="text-center">72.8M</td>
+          <td class="text-center"></td>
+        </tr>
+        <tr>
+          <td class="text-center">Fat density (kg/L)***</td>
+          <td class="text-center">0.9</td>
+          <td class="text-center"></td>
+          <td class="text-center"><a href="http://answers.google.com/answers/threadview/id/576481.html">google</a></td>
+        </tr>
+        <tr>
+          <td class="text-center">Total Fat Volume (L)</td>
+          <td class="text-center">116M</td>
+          <td class="text-center">80.9M</td>
+          <td class="text-center"></td>
+        </tr>
+        <tr>
+          <td class="text-center">Which is a cube of side (m)</td>
+          <td class="text-center">48</td>
+          <td class="text-center">43</td>
+          <td class="text-center"></td>
+        </tr>
+        <tr>
+          <td class="text-center">Ice Rink Area (m<sup>2</sup>)</td>
+          <td class="text-center">1,579</td>
+          <td class="text-center"></td>
+          <td class="text-center"><a href="http://www.mybackyardicerink.com/hockey-rink-dimensions.html">google</a></td>
+        </tr>
+        <tr>
+          <td class="text-center">Ice Rinks in Canada</td>
+          <td class="text-center">2,631</td>
+          <td class="text-center"></td>
+          <td class="text-center"><a href="http://www.statista.com/statistics/282363/number-of-ice-hockey-rinks-in-canada/">google</a></td>
+        </tr>
+        <tr>
+          <td class="text-center">Ice Rinks covered to depth of (cm)</td>
+          <td class="text-center">2.8</td>
+          <td class="text-center">1.9</td>
+          <td class="text-center"></td>
+        </tr>
+      </tbody>
+    </table>
+
+<h3>Notes</h3>
+<ul>
+  <li>*Based on halfway between the min and max weight for overweight BMI range</li>
+  <li>**Based on min weight for obese BMI plus half of overweight BMI range weight.  I thought that was probably OK.</li>
+  <li>***I'm just assuming that the excess weight is all fat - not valid.  BMI is especially bad for people with big muscles (like, totally me), and I'm just ignoring that.
+  <li>Some various assumptions that I'm making, good or bad:
+  <ul>
+    <li>Obesity isn't correlated with height</li>
+    <li>BMI is uniformly distributed within BMI ranges (probably not 100% true)</li>
+    <li>Obese BMIs range similarly to overweight BMI ranges (definitely not 100% true, but whatevs)</li>
+  </ul>
+</ul>
+{% endblock %}

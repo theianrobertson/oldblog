@@ -1,6 +1,6 @@
 from flask import render_template
 
-from app import app, pages
+from .app import app, pages
 
 
 @app.route('/')
@@ -10,6 +10,16 @@ def home():
     sorted_posts = sorted(posts, reverse=True,
         key=lambda page: page.meta['date'])
     return render_template('index.html', pages=sorted_posts)
+
+"""
+@app.route('/<page>/')
+def get_page(page):
+    return render_template(page + '.html')
+"""
+
+@app.route('/everyaddress/')
+def everyaddress():
+    return render_template('everyaddress.html')
 
 @app.route('/adayinthelife/')
 def adayinthelife():
@@ -70,4 +80,3 @@ def apply():
 @app.route('/resume/')
 def resume():
     return render_template('resume.html')
-
