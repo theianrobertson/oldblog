@@ -11,11 +11,9 @@ def home():
         key=lambda page: page.meta['date'])
     return render_template('index.html', pages=sorted_posts)
 
-"""
-@app.route('/<page>/')
-def get_page(page):
-    return render_template(page + '.html')
-"""
+@app.route('/circles/')
+def circles():
+    return render_template('circles.html')
 
 @app.route('/everyaddress/')
 def everyaddress():

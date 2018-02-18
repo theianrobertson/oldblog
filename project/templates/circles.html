@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block page_title %}Circle Pictures{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block content %}
+<h1>Circle Pictures</h1>
+<img src="{{ url_for('static', filename='circles/audrey.png') }}" height="500" width="500">
+<h2>What's This?</h2>
+<p>Recently I saw these images <a href="https://i.redd.it/7knauidxy94y.jpg">here</a> and <a href="http://i.imgur.com/FiXlS8F.jpg">here</a>, which I thought were very cool-looking.  I thought maybe I could do similar myself, using naught but Python.  So I built a <a href="https://github.com/theianrobertson/circle-pics">little tool</a> that converts an image that looks like this:</p>
+<p><img src="{{ url_for('static', filename='circles/guido_small.jpg') }}"></p>
+<p>Into this:</p>
+<p><img src="{{ url_for('static', filename='circles/guido.png') }}"></p>
+<h2>How's it work?</h2>
+<p>The tool uses the fantastic <a href="https://pillow.readthedocs.io/en/latest/">Pillow</a> library to do picture manipulations.  It actually "draws" around the circles by:
+<ol>
+    <li>Creating a blank canvas the same size as the image</li>
+    <li>Picking a spot in the middle of the canvas</li>
+    <li>Iterating around 360 degrees, growing the radius slightly each time with some arbitrary "wobbles"</li>
+    <li>Drawing lines between subsequent points, where the width of the line is proportional to the greyscale value (white would be a minimum width, black a maximum width)</li>
+    <li>Repeating the 360 degree iteration a bunch of times</li>
+    <li>???</li>
+    <li>Profit!</li>
+</ol>
+</p>
+<h2>Notes</h2>
+<ul>
+    <li>My code is <a href="https://github.com/theianrobertson/circle-pics">here</a></li>
+    <li>Big shout out to the original artists of the pictures I came across.  <a href="https://www.boredpanda.com/single-line-plotter-drawings-sergej-stoppel/">Sergej Stoppel made the robot</a> which made the first one, and I think the other was Reddit user <a href="https://www.reddit.com/user/Patakk">Patakk</a> (but I'm not 100% sure).</li>
+</ul>
+{% endblock %}
+
+
+
