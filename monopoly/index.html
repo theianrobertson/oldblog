@@ -1,0 +1,222 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>Monopoly</title>
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  <link rel="shortcut icon" href="/static/favicon.ico">
+  
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+
+  
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+</head>
+<body class="box">
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <ul class="nav navbar-nav">
+      <li><a href="/">Ian Robertson</a></li>
+      <li><a href="/aboutme/">About Me</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="https://github.com/theianrobertson"><img src="/static/github.svg" alt="github" height="24" width="24"></a></li>
+      <li><a href="https://www.linkedin.com/in/ianrobertson85/"><img src="/static/linkedin.svg" alt="linkedin" height="24" width="24"></a></li>
+      <li><a href="https://www.instagram.com/theianrobertson/"><img src="/static/instagram.svg" alt="instagram" height="24" width="24"></a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<div class="container" role="main">
+    
+<h1>Monopoly Junior Party... and Python!</h1>
+<img src="/static/monopoly/box.jpg">
+<br>
+<hr>
+<p>
+My son is four years old, and he got a copy of the Monopoly Junior Party edition board game as a gift.
+That means that I get to play Monopoly Junior Party with a four-year-old!  And while I do really (actually)
+enjoy playing with my kid, and he's learning things about dice, counting and capitalism, a couple of things
+rankle:
+</p>
+
+<ol>
+  <li>Our copy of the game came without money.  Monopoly, with no money!</li>
+  <li>The first ~10 times I played the game with my son, I lost, and it wasn't even close.  To the point
+  where he kept offering to just <em>give</em> me money so we could keep playing.  But this game wasn't
+  designed to show the evils of <em>socialism</em>, so I turned him down.</li>
+</ol>
+
+<p>
+The first issue I could solve by using real money, so we cracked open my coin jar to get a bunch of quarters
+out.  The second issue seemed more interesting - my son always went first, because I didn't want to have
+an argument with him about who got to go first.  I started thinking about Jake VanderPlas'
+<a href="https://jakevdp.github.io/blog/2017/12/18/simulating-chutes-and-ladders/">excellent analysis of chutes and ladders</a>,
+and wondered if I could figure out whether the gameboard was tilted in his favour.
+</p>
+
+<h2>Enter Python</h2>
+
+<p>
+Monopoly Junior Party is way simpler than
+<a href="https://www.amazon.ca/Monopoly-B0324-Game-Star-Wars/dp/B00SDJG6QC">real Monopoly</a>, and there's almost no
+decisions that need to be made during the game.  If you land on a <del>property</del> <em>party</em> square, you have
+to buy it.  You can't trade or sell <del>properties</del> <em>parties</em>.  There's no such thing as houses and hotels.
+People have written <a href="http://www.amnesta.net/monopoly/">extensively</a> about how to win at "real" Monopoly,
+but for me it's pretty much dumb luck.</p>
+
+<p>
+Since there's no real decisions to make, I figured it'd be pretty easy to just simulate a whole game in
+Python.  It's a nice way to get a quick introduction to Python 3.7's
+<a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a> too, which I'd been planning
+on playing around with.  So one afternoon while my kids were napping/having quiet time, I busted out the
+game board and coded up the game structure in Python.
+</p>
+
+<h2>Code</h2>
+
+<p>
+I wound up with a <code>Player</code> and <code>Game</code> class, a couple of yaml files with square and chance card settings
+in them, and a bit of wrapper code to run a random game.  See the
+<a href="https://github.com/theianrobertson/monopoly-junior/blob/master/main.py">main.py</a> file to check out
+what the code looks like.
+</p>
+
+<p>
+I used Python's <code>dataclasses.dataclass</code> class decorator for the <code>Player</code> class,
+and it's kinda nice.  The feature definitely cut down on the number of times I had to write each
+parameter and "self", which was nice.  Compare the dataclass version:</p>
+
+<pre><code class="python">@dataclass
+class Player:
+    name: str
+    money: int
+    squares_owned: set
+    current_square: int = 0
+    presents: int = STARTING_PRESENTS
+    in_jail: bool = False
+    has_get_out_of_jail_card: bool = False
+</code></pre>
+
+<p>To how it would have looked without dataclasses:</p>
+
+<pre><code class="python">class Player:
+    def __init__(self, name, money):
+        self.name = name
+        self.money = money
+        self.squares_owned = set()
+        self.current_square = 0
+        self.presents = STARTING_PRESENTS
+        self.in_jail = False
+        self.has_get_out_of_jail_card = False
+</code></pre>
+<p>
+And how the object <code>__repr__</code> looks with a dataclass:
+</p>
+
+<pre><code class="python">Player(name='Ian', money=18, squares_owned=set(), current_square=0, presents=8, in_jail=False, has_get_out_of_jail_card=False)
+</code></pre>
+
+<p>
+vs. without:
+</p>
+
+<pre><code class="python"><__main__.Player object at 0x101c66588>
+</code></pre>
+
+<p>With a bit of work, I hacked together a way to churn through a bunch of games to figure out who is
+  more likely to win.</p>
+
+<h2>Simulations</h2>
+
+<p>The big question I wanted to answer was whether the board was unfairly tilted in my son's favour.
+To figure that out, I ran a 100,000 games and checked whether my son (player 1, went first) or me
+(player 2, went second) won more.  A game ends when someone runs out of money.  To figure out the
+winner, you add up all the money you have left over, and add one point for every <del>property</del> party you own, and
+the player with the highest total wins.  That calculation means that ties are possible, even with only two
+players.</p>
+
+<p>Without further ado, the player that moves first won 52.6% of games, and the second player won
+47.9% of games (over 100% total because of ties).  So there is an advantage, but it's not as strong
+as I'd suspected:</p>
+<img src="/static/monopoly/game_winners_2.png">
+
+<h3>What about when my daughter is old enough to play?</h3>
+
+<p>
+I have a daughter that just turned one.  What happens when I eventually play against both of my kids?
+Running the simulation again but with three players, and player one won 40.0% of games, player two
+won 34.8% of games, and player three (let's face it, that'll be me) only won a measly 30.5% of games.
+Now <em>that</em> is unfair.</p>
+<img src="/static/monopoly/game_winners_3.png">
+
+<p>If I were to rope my wife in to the game too and all four of us played, player one still won 33.2%
+  of all simulated games, and player four (still, probably me) only wins 21%.  That's almost 60% more!
+</p>
+<img src="/static/monopoly/game_winners_4.png">
+
+<p>Suffice to say, I'm getting the raw end of this Monopoly game.</p>
+
+<h3>Game Lengths</h3>
+<p>
+If I'm going to settle in to losing at Monopoly, I might as well know what I'm in for.  Luckily, most
+games are faster than games of real Monopoly, with most finishing within 25 moves or so:
+</p>
+<img src="/static/monopoly/game_length_2_player.png">
+<p>The fastest games are typically where someone gets unlucky enough to jump to the "expensive" parties
+  (at least they're expensive for the 4-year-old set),
+  then lands on a bunch of them, quickly draining their bank account.  Inexplicably, a fairly tame
+  Beach Party costs 5 dollars, more expensive than a Movie Party at
+  1 dollar.  This game, for example, lasts only nine moves!<p>
+<pre>son rolled chance|{'type': 'goto-and-get', 'colour': 'red'} bought Clown Party
+dad rolled 4|dad --> Swimming Party bought!
+son rolled 6|son --> Spooky Party bought!
+dad rolled 5|dad --> Party Box
+son rolled 1|son --> Safari Party bought!
+dad rolled 1|dad --> Pizza Party bought!
+son rolled 2|son --> Beach Party bought!
+dad rolled 1|dad --> Piñata Party bought!
+son rolled 1|son --> Theme Park Party bought!
+</pre>
+
+<p>Player one (my son) gets the Clown Party for free, then has to buy Spooky ($4), Safari ($4), Beach ($5)
+  and Theme Park ($5) Parties.  That's enough to wipe out the $18 starting credits, and get me back
+to the couch.</p>
+
+<h3>Can I quickly tell if I'm going to lose?</h3>
+<p>Another thing I wanted to look into was whether there's a move or a few moves right off the bat
+  in the game that would set me up to lose (or swing the pendulum back to my side).  So going back to
+  the results from a two-player game, I checked the
+  win distribution based on the set of first two moves (6 x 6 = 36 possible combinations):</p>
+<ul>
+  <li>When ('son rolled 1', 'dad rolled 5'), son won 46.27%</li>
+  <li>When ('son rolled 1', 'dad rolled 2'), son won 47.95%</li>
+  <li>When ('son rolled 1', 'dad rolled 4'), son won 49.37%</li>
+  <li>...</li>
+  <li>When ('son rolled 1', 'dad rolled 1'), son won 57.75%</li>
+  <li>When ('son rolled 4', 'dad rolled 4'), son won 58.73%</li>
+  <li>When ('son rolled 2', 'dad rolled 2'), son won 60.19%</li>
+  <li>When ('son rolled 5', 'dad rolled 5'), son won 60.90%</li>
+</ul>
+<p>My best chance to win is to leap out in front of my son. If he rolls a one and I pass him on the first
+  move, I have a better than 50% chance of winning.  My worst chances come when I land on the same
+  <del>property</del> party as he does right away.</p>
+
+<h3>How can I tell mid-game though?</h3>
+<p>Next thing I wanted to check was which <del>properties</del> parties were most associated with winning,
+  so that if my son got one of them I can give up more hope of winning.  Turns out the most expensive
+  <del>properties</del> parties, the Beach and Theme Park parties are the most valuable too - if you
+  wind up owning one of them your chances of winning are 60%!</p>
+<h2>Conclusion</h2>
+<p>This simulation and analysis was more fun than playing Monopoly.</p>
+<br>
+
+</div>
+
+</div>
+<script src="/static/js/script.js"></script>
+</body>
+</html>

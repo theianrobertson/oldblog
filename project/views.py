@@ -78,3 +78,11 @@ def apply():
 @app.route('/resume/')
 def resume():
     return render_template('resume.html')
+
+# @app.route('/bikeshare/')
+# def bikeshare():
+#     return render_template('bikeshare.html')
+
+@app.route('/monopoly/')
+def monopoly():
+    return render_template('monopoly.html')
